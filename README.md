@@ -184,6 +184,132 @@ curl -X POST http://localhost:3000/alerts -H "Content-Type: application/json" -d
 "contact_number": "998811
 ```
 
+# caution
+
+```shell
+curl -X POST http://localhost:3000/alerts -H "Content-Type: application/json" -d '{
+  "lat": -27.5954,
+  "lng": -48.5480,
+  "event_name": "Atenção: Zona de Cuidado",
+  "type": "caution",
+  "description": "Zona de cuidado devido a obras na estrada",
+  "tags": ["cuidado", "obras"],
+  "contact_number": "99880088"
+}'
+```
+
+#### pets
+
+```shell
+curl -X POST http://localhost:3000/alerts -H "Content-Type: application/json" -d '{
+  "lat": -29.1681,
+  "lng": -51.1797,
+  "event_name": "Animais Perdidos",
+  "type": "pets",
+  "description": "Dois cães encontrados sem dono",
+  "tags": ["animais", "perdidos"],
+  "contact_number": "99887744"
+}'
+```
+
+#### help
+
+```shell
+curl -X POST http://localhost:3000/alerts -H "Content-Type: application/json" -d '{
+  "lat": -30.0346,
+  "lng": -51.2177,
+  "event_name": "Solicitação de Ajuda",
+  "type": "help",
+  "description": "Família sem abrigo devido a incêndio",
+  "tags": ["família", "abrigo"],
+  "contact_number": "99889911"
+}'
+```
+
+#### rescue
+
+```shell
+curl -X POST http://localhost:3000/alerts -H "Content-Type: application/json" -d '{
+  "lat": -27.6344,
+  "lng": -48.6784,
+  "event_name": "Resgate Necessário",
+  "type": "rescue",
+  "description": "Pessoas presas devido a enchente",
+  "tags": ["resgate", "enchente"],
+  "contact_number": "99883344"
+}'
+```
+
+#### sos
+
+```shell
+curl -X POST http://localhost:3000/alerts -H "Content-Type: application/json" -d '{
+  "lat": -25.5163,
+  "lng": -54.5854,
+  "event_name": "Emergência SOS",
+  "type": "sos",
+  "description": "Sinal de emergência recebido, socorro necessário",
+  "tags": ["sos", "socorro"],
+  "contact_number": "99885566"
+}'
+```
+
+#### shelter
+
+```shell
+curl -X POST http://localhost:3000/alerts -H "Content-Type: application/json" -d '{
+  "lat": -29.6897,
+  "lng": -53.8068,
+  "event_name": "Abrigo Disponível",
+  "type": "shelter",
+  "description": "Abrigo temporário para pessoas sem teto",
+  "tags": ["abrigo", "temporário"],
+  "contact_number": "99882255"
+}'
+```
+
+#### warning-red-yellow
+
+```shell
+curl -X POST http://localhost:3000/alerts -H "Content-Type: application/json" -d '{
+  "lat": -27.1019,
+  "lng": -52.6157,
+  "event_name": "Alerta: Risco Moderado",
+  "type": "warning-red-yellow",
+  "description": "Risco moderado de deslizamento",
+  "tags": ["deslizamento", "moderado"],
+  "contact_number": "99887777"
+}'
+```
+
+#### warning-yellow
+
+```shell
+curl -X POST http://localhost:3000/alerts -H "Content-Type: application/json" -d '{
+  "lat": -28.2450,
+  "lng": -52.4067,
+  "event_name": "Alerta: Risco de Chuva Forte",
+  "type": "warning-yellow",
+  "description": "Previsão de chuva forte na região",
+  "tags": ["chuva", "forte"],
+  "contact_number": "99886699"
+}'
+```
+
+#### warning
+
+```shell
+curl -X POST http://localhost:3000/alerts -H "Content-Type: application/json" -d '{
+  "lat": -26.3044,
+  "lng": -48.8456,
+  "event_name": "Alerta Geral",
+  "type": "warning",
+  "description": "Alerta de perigo devido a tempestade",
+  "tags": ["tempestade", "perigo"],
+  "contact_number": "99881122"
+}'
+```
+
 ### Built With
 
 - Node.js - The runtime server environment
