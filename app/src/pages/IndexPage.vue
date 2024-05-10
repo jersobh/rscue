@@ -11,6 +11,17 @@
       <Popup v-if="marker.showPopup">
         <div class="popup-content">
           {{ marker.description }}
+          <div>
+            <q-btn-group rounded>
+              <q-btn
+                color="primary"
+                rounded
+                icon-right="visibility"
+                label="View"
+              />
+              <q-btn color="green" rounded icon-right="check" label="Answer" />
+            </q-btn-group>
+          </div>
         </div>
       </Popup>
     </Marker>
@@ -42,12 +53,12 @@ function togglePopup(markerId) {
 
 async function fetchMarkers() {
   try {
-    const response = await fetch('http://localhost:3000/alerts');
+    const response = await fetch('http://192.168.68.103:3000/alerts');
     const data = await response.json();
     markers.value = data.map((marker) => ({
       ...marker,
       position: [marker.lat, marker.lng],
-      icon: `/src/assets/${marker.type}.png`,
+      icon: `./icons/${marker.type}.png`,
       showPopup: false,
     }));
   } catch (error) {
@@ -73,7 +84,7 @@ function centerOnMe() {
 }
 
 function listenToAlerts() {
-  const evtSource = new EventSource('http://localhost:3000/alerts/stream');
+  const evtSource = new EventSource('http://192.168.68.103:3000/alerts/stream');
   evtSource.onmessage = function (event) {
     const data = JSON.parse(event.data);
 
@@ -85,12 +96,26 @@ function listenToAlerts() {
     } else if (data.type === 'deleteAll') {
       markers.value = [];
     } else {
-      markers.value.push({
+      const existingIndex = markers.value.findIndex(
+        (marker) => marker.id === data.id
+      );
+
+      const newMarker = {
         ...data,
         position: [data.lat, data.lng],
-        icon: `/src/assets/${data.type}.png`,
+        icon: `icons/${data.type}.png`,
         showPopup: false,
-      });
+      };
+
+      if (existingIndex !== -1) {
+        // Update the existing marker's position
+        markers.value[existingIndex].position = [data.lat, data.lng];
+        markers.value[existingIndex].icon = `icons/${data.type}.png`;
+        // Optionally update other properties if they have changed
+      } else {
+        // Add new marker if it doesn't exist
+        markers.value.push(newMarker);
+      }
     }
   };
 
@@ -100,7 +125,7 @@ function listenToAlerts() {
 }
 
 onMounted(async () => {
-  fetchMarkers();
+  // fetchMarkers();
   listenToAlerts();
 });
 </script>
@@ -111,5 +136,10 @@ onMounted(async () => {
 .popup-content {
   font-size: 16px;
   color: #333;
+  text-align: center;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 </style>
