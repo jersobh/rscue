@@ -167,24 +167,30 @@ const server = app.listen(3000, () => {
 
 const wss = new WebSocket.Server({ server, path: '/ws' });
 
+const clientAlerts = new Map();
+
 wss.on('connection', (ws) => {
+  // Track alerts for this specific client
+  clientAlerts.set(ws, []);
+
   ws.on('message', (message) => {
     try {
       const sosAlert = JSON.parse(message);
-      const { lat, lng, name, description, tags, type } = sosAlert;
+      const { lat, lng, event_name, description, tags, type } = sosAlert;
 
-      if (!lat || !lng || !name || !description || !tags || !type) {
+      if (!lat || !lng || !event_name || !description || !tags || !type) {
         ws.send(JSON.stringify({ error: 'All fields are required' }));
         return;
       }
 
-      const stmt =
-        db.prepare(`INSERT INTO alerts (lat, lng, event_name, type, description, tags, contact_number)
-                                     VALUES (?, ?, ?, ?, ?, ?, '')`);
+      const stmt = db.prepare(`
+        INSERT INTO alerts (lat, lng, event_name, type, description, tags, contact_number)
+        VALUES (?, ?, ?, ?, ?, ?, '')
+      `);
       stmt.run(
         lat,
         lng,
-        name,
+        event_name,
         type,
         description,
         tags.join(','),
@@ -198,12 +204,15 @@ wss.on('connection', (ws) => {
             id: this.lastID,
             lat,
             lng,
-            event_name: name,
+            event_name,
             type,
             description,
             tags,
             contact_number: '',
           };
+
+          // Add the alert to the client's list of alerts
+          clientAlerts.get(ws).push(newSosAlert.id);
 
           // Notify all WebSocket clients of the new SOS alert
           wss.clients.forEach((client) => {
@@ -222,6 +231,39 @@ wss.on('connection', (ws) => {
     } catch (error) {
       ws.send(JSON.stringify({ error: 'Invalid data format' }));
     }
+  });
+
+  ws.on('close', () => {
+    // Delete all alerts created by this WebSocket client
+    const alertIds = clientAlerts.get(ws) || [];
+
+    alertIds.forEach((alertId) => {
+      const stmt = db.prepare(`DELETE FROM alerts WHERE id = ?`);
+      stmt.run(alertId, (err) => {
+        if (err) {
+          console.error('Error deleting alert:', err);
+        } else {
+          const deletionNotification = { type: 'delete', id: alertId };
+
+          // Notify other WebSocket clients
+          wss.clients.forEach((client) => {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(JSON.stringify(deletionNotification));
+            }
+          });
+
+          // Notify all connected SSE clients
+          sseClients.forEach((client) => {
+            client.res.write(
+              `data: ${JSON.stringify(deletionNotification)}\n\n`
+            );
+          });
+        }
+      });
+    });
+
+    // Clean up the client from the map
+    clientAlerts.delete(ws);
   });
 
   // Send the initial list of alerts
