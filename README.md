@@ -2,6 +2,14 @@
 
 This project provides an API service for managing alerts. It is containerized with Docker for easy setup and deployment.
 
+<img src="https://raw.githubusercontent.com/jersobh/rscue/main/img/1.png" width=250 />
+<img src="https://raw.githubusercontent.com/jersobh/rscue/main/img/2.png" width=250 />
+<img src="https://raw.githubusercontent.com/jersobh/rscue/main/img/3.png" width=250 />
+<img src="https://raw.githubusercontent.com/jersobh/rscue/main/img/4.png" width=250 />
+<img src="https://raw.githubusercontent.com/jersobh/rscue/main/img/5.png" width=250 />
+<img src="https://raw.githubusercontent.com/jersobh/rscue/main/img/6.png" width=250 />
+<img src="https://raw.githubusercontent.com/jersobh/rscue/main/img/7.png" width=250 />
+
 ## Getting Started
 
 These instructions will cover usage information and for the docker container
