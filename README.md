@@ -1,4 +1,4 @@
-# API Service
+# RScue - RScue is an app for helping to give aid to victms and help the rescue on catastrophes
 
 This project provides an API service for managing alerts. It is containerized with Docker for easy setup and deployment.
 
