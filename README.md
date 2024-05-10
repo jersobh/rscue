@@ -71,6 +71,119 @@ curl -X POST http://localhost:3000/alerts -H "Content-Type: application/json" -d
 curl http://localhost:3000/alerts
 ```
 
+### Other alert examples
+
+#### alert-red
+
+```shell
+curl -X POST http://localhost:3000/alerts -H "Content-Type: application/json" -d '{
+"lat": -30.0277,
+"lng": -51.2287,
+"event_name": "Alerta Vermelho",
+"type": "alert-red",
+"description": "Emergência devido a inundação",
+"tags": ["emergência", "inundação"],
+"contact_number": "99887766"
+}'
+```
+
+#### ambulance
+
+```shell
+curl -X POST http://localhost:3000/alerts -H "Content-Type: application/json" -d '{
+"lat": -26.3044,
+"lng": -48.8456,
+"event_name": "Ambulância Necessária",
+"type": "ambulance",
+"description": "Acidente grave necessitando ambulância",
+"tags": ["acidente", "urgente"],
+"contact_number": "99887755"
+}'
+```
+
+#### blocked
+
+```shell
+curl -X POST http://localhost:3000/alerts -H "Content-Type: application/json" -d '{
+"lat": -25.4284,
+"lng": -49.2733,
+"event_name": "Rua Bloqueada",
+"type": "blocked",
+"description": "Árvore caída bloqueando a rua",
+"tags": ["obstrução", "árvore caída"],
+"contact_number": "99886644"
+}'
+```
+
+#### missing-person
+
+```shell
+curl -X POST http://localhost:3000/alerts -H "Content-Type: application/json" -d '{
+"lat": -29.6842,
+"lng": -53.8069,
+"event_name": "Pessoa Desaparecida",
+"type": "missing-person",
+"description": "Menino desaparecido de 10 anos",
+"tags": ["desaparecido", "criança"],
+"contact_number": "99885533"
+}'
+```
+
+#### road-block
+
+```shell
+curl -X POST http://localhost:3000/alerts -H "Content-Type: application/json" -d '{
+"lat": -27.5969,
+"lng": -48.5495,
+"event_name": "Bloqueio na Estrada",
+"type": "road-block",
+"description": "Construção causando bloqueio na estrada principal",
+"tags": ["construção", "bloqueio"],
+"contact_number": "99884422"
+}'
+```
+
+#### warning-red-yellow
+
+```shell
+curl -X POST http://localhost:3000/alerts -H "Content-Type: application/json" -d '{
+"lat": -28.2620,
+"lng": -52.4067,
+"event_name": "Atenção: Perigo de Deslizamento",
+"type": "warning-red-yellow",
+"description": "Alerta de deslizamento nas encostas próximas",
+"tags": ["alerta", "deslizamento"],
+"contact_number": "99883311"
+}'
+```
+
+#### alert
+
+```shell
+curl -X POST http://localhost:3000/alerts -H "Content-Type: application/json" -d '{
+"lat": -26.9206,
+"lng": -49.0661,
+"event_name": "Alerta Geral",
+"type": "alert",
+"description": "Teste de sistema de alerta público",
+"tags": ["teste", "sirene"],
+"contact_number": "99882200"
+}'
+```
+
+#### atention
+
+```shell
+curl -X POST http://localhost:3000/alerts -H "Content-Type: application/json" -d '{
+"lat": -25.5013,
+"lng": -54.5786,
+"event_name": "Atenção no Local",
+"type": "atention",
+"description": "Área de alto risco de acidente",
+"tags": ["precaução", "acidente"],
+"contact_number": "998811
+```
+
 ### Built With
 
 - Node.js - The runtime server environment
