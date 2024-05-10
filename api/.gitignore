@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Logs and debug files
+logs/
+*.log
+
+# SQLite database files (if applicable)
+*.db
+*.db-journal
+
+# Environment configuration
+.env
+
+# Editor or OS-specific files
+.DS_Store
+

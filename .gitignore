@@ -1,0 +1,17 @@
+# Ignore the node_modules folder, logs, and build outputs in both frontend and backend.
+node_modules/
+logs/
+dist/
+
+# Docker-related files that shouldn't be committed.
+docker-compose.override.yml
+.env
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+

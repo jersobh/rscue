@@ -1,0 +1,17 @@
+{
+  "name": "tracker",
+  "version": "1.0.0",
+  "description": "Tracker backend",
+  "main": "index.js",
+  "author": "jersobh",
+  "license": "MIT",
+  "scripts": {
+    "server": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "sqlite3": "^5.1.7",
+    "ws": "^8.17.0",
+    "cors": "^2.8.5"
+  }
+}

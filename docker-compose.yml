@@ -1,0 +1,22 @@
+services:
+  api:
+    build:
+      context: ./api # Path to the directory containing the Dockerfile
+      dockerfile: Dockerfile
+    hostname: api
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./api/src:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped
+
+  app:
+    build: ./app
+    ports:
+      - '80:80'
+    depends_on:
+      - api
+    restart: unless-stopped
