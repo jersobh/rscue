@@ -17,6 +17,7 @@ const db = new sqlite3.Database('./alerts.db');
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS alerts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uuid TEXT UNIQUE,
         lat REAL,
         lng REAL,
         event_name TEXT,
@@ -28,6 +29,14 @@ db.serialize(() => {
 });
 
 const sseClients = [];
+
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 
 // HTTP Routes
 app.post('/alerts', (req, res) => {
@@ -46,9 +55,11 @@ app.post('/alerts', (req, res) => {
     return res.status(400).json({ error: 'All fields are required' });
   }
 
+  const uuid = uuidv4();
+
   const stmt =
-    db.prepare(`INSERT INTO alerts (lat, lng, event_name, type, description, tags, contact_number)
-                             VALUES (?, ?, ?, ?, ?, ?, ?)`);
+    db.prepare(`INSERT INTO alerts (lat, lng, event_name, type, description, tags, contact_number, uuid)
+                             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`);
   stmt.run(
     lat,
     lng,
@@ -57,6 +68,7 @@ app.post('/alerts', (req, res) => {
     description,
     tags.join(','),
     contact_number,
+    uuid,
     function (err) {
       if (err) {
         return res.status(500).json({ error: 'Database error' });
@@ -71,6 +83,7 @@ app.post('/alerts', (req, res) => {
         description,
         tags,
         contact_number,
+        uuid,
       };
 
       // Notify all WebSocket clients of the new alert
@@ -176,16 +189,33 @@ wss.on('connection', (ws) => {
   ws.on('message', (message) => {
     try {
       const sosAlert = JSON.parse(message);
-      const { lat, lng, event_name, description, tags, type } = sosAlert;
+      const {
+        lat,
+        lng,
+        event_name,
+        description,
+        tags,
+        type,
+        contact_number,
+        uuid,
+      } = sosAlert;
 
-      if (!lat || !lng || !event_name || !description || !tags || !type) {
+      if (
+        !lat ||
+        !lng ||
+        !event_name ||
+        !description ||
+        !tags ||
+        !type ||
+        !uuid
+      ) {
         ws.send(JSON.stringify({ error: 'All fields are required' }));
         return;
       }
 
       const stmt = db.prepare(`
-        INSERT INTO alerts (lat, lng, event_name, type, description, tags, contact_number)
-        VALUES (?, ?, ?, ?, ?, ?, '')
+        INSERT INTO alerts (lat, lng, event_name, type, description, tags, contact_number, uuid)
+        VALUES (?, ?, ?, ?, ?, ?, '', ?)
       `);
       stmt.run(
         lat,
@@ -194,6 +224,7 @@ wss.on('connection', (ws) => {
         type,
         description,
         tags.join(','),
+        uuid,
         function (err) {
           if (err) {
             ws.send(JSON.stringify({ error: 'Database error' }));
@@ -208,11 +239,12 @@ wss.on('connection', (ws) => {
             type,
             description,
             tags,
-            contact_number: '',
+            contact_number,
+            uuid,
           };
 
           // Add the alert to the client's list of alerts
-          clientAlerts.get(ws).push(newSosAlert.id);
+          clientAlerts.get(ws).push(newSosAlert.uuid);
 
           // Notify all WebSocket clients of the new SOS alert
           wss.clients.forEach((client) => {
@@ -238,12 +270,12 @@ wss.on('connection', (ws) => {
     const alertIds = clientAlerts.get(ws) || [];
 
     alertIds.forEach((alertId) => {
-      const stmt = db.prepare(`DELETE FROM alerts WHERE id = ?`);
+      const stmt = db.prepare(`DELETE FROM alerts WHERE uuid = ?`);
       stmt.run(alertId, (err) => {
         if (err) {
           console.error('Error deleting alert:', err);
         } else {
-          const deletionNotification = { type: 'delete', id: alertId };
+          const deletionNotification = { type: 'delete', uuid: alertId };
 
           // Notify other WebSocket clients
           wss.clients.forEach((client) => {

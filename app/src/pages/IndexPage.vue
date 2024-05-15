@@ -1,12 +1,16 @@
 <template>
-  <MapContainer style="height: 100vh" :center="center" :zoom="zoom">
+  <MapContainer
+    style="height: 100vh; width: 100%"
+    :center="center"
+    :zoom="zoom"
+  >
     <OpenStreetMap />
     <Marker
       v-for="marker in markers"
-      :key="marker.id"
+      :key="marker.uuid"
       :position="marker.position"
       :icon="marker.icon"
-      @click="togglePopup(marker.id)"
+      @click="togglePopup(marker.uuid)"
     >
       <Popup v-if="marker.showPopup">
         <div class="popup-content">
@@ -39,42 +43,33 @@
 <script setup>
 import { MapContainer, OpenStreetMap, Marker, Popup } from 'vue3-leaflet';
 import { ref, onMounted, onUnmounted } from 'vue';
+import { EventBus } from 'src/EventBus';
 
 const center = ref([-14.235, -51.9253]);
-const zoom = ref(4);
+const zoom = ref(14);
 const markers = ref([]);
 
+// Toggle the popup visibility for a specific marker
 function togglePopup(markerId) {
-  const marker = markers.value.find((m) => m.id === markerId);
+  const marker = markers.value.find((m) => m.uuid === markerId);
   if (marker) {
+    panTo(marker);
     marker.showPopup = !marker.showPopup;
   }
 }
 
-async function fetchMarkers() {
-  try {
-    const response = await fetch('http://192.168.68.103:3000/alerts');
-    const data = await response.json();
-    markers.value = data.map((marker) => ({
-      ...marker,
-      position: [marker.lat, marker.lng],
-      icon: `./icons/${marker.type}.png`,
-      showPopup: false,
-    }));
-  } catch (error) {
-    console.error('Failed to fetch markers:', error);
-  }
-}
+// Pan the map to the specified marker
+const handlePanTo = (markerId) => {
+  const marker = markers.value.find((m) => m.uuid === markerId);
+  panTo(marker);
+};
 
+// Center the map on the user's current location
 function centerOnMe() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const currentLocation = [
-          position.coords.latitude,
-          position.coords.longitude,
-        ];
-        center.value = currentLocation;
+        center.value = [position.coords.latitude, position.coords.longitude];
       },
       () => {
         alert('Geolocation is not supported by this browser.');
@@ -83,13 +78,23 @@ function centerOnMe() {
   }
 }
 
+// Pan the map to the specified marker's position
+function panTo(marker) {
+  if (marker) {
+    center.value = marker.position;
+  }
+}
+
+// Listen for alerts and update markers accordingly
 function listenToAlerts() {
   const evtSource = new EventSource('http://192.168.68.103:3000/alerts/stream');
-  evtSource.onmessage = function (event) {
+  evtSource.onmessage = (event) => {
     const data = JSON.parse(event.data);
 
     if (data.type === 'delete') {
-      const index = markers.value.findIndex((marker) => marker.id === data.id);
+      const index = markers.value.findIndex(
+        (marker) => marker.uuid === data.uuid
+      );
       if (index !== -1) {
         markers.value.splice(index, 1);
       }
@@ -97,9 +102,8 @@ function listenToAlerts() {
       markers.value = [];
     } else {
       const existingIndex = markers.value.findIndex(
-        (marker) => marker.id === data.id
+        (marker) => marker.uuid === data.uuid
       );
-
       const newMarker = {
         ...data,
         position: [data.lat, data.lng],
@@ -108,12 +112,8 @@ function listenToAlerts() {
       };
 
       if (existingIndex !== -1) {
-        // Update the existing marker's position
-        markers.value[existingIndex].position = [data.lat, data.lng];
-        markers.value[existingIndex].icon = `icons/${data.type}.png`;
-        // Optionally update other properties if they have changed
+        Object.assign(markers.value[existingIndex], newMarker);
       } else {
-        // Add new marker if it doesn't exist
         markers.value.push(newMarker);
       }
     }
@@ -124,9 +124,9 @@ function listenToAlerts() {
   });
 }
 
-onMounted(async () => {
-  // fetchMarkers();
+onMounted(() => {
   listenToAlerts();
+  EventBus.on('panTo', handlePanTo);
 });
 </script>
 
